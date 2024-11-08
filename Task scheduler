@@ -1,0 +1,135 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define structure for a task
+typedef struct {
+    int taskID;
+    char taskName[50];
+    int priority;
+} Task;
+
+// Define structure for a node in the queue
+typedef struct Node {
+    Task data;
+    struct Node* next;
+} Node;
+
+// Define structure for the queue
+typedef struct {
+    Node* front;
+    Node* rear;
+} Queue;
+
+// Function to initialize a queue
+void initializeQueue(Queue* q) {
+    q->front = NULL;
+    q->rear = NULL;
+}
+
+// Function to check if the queue is empty
+int isEmpty(Queue* q) {
+    return q->front == NULL;
+}
+
+// Function to enqueue a task into the queue
+void enqueue(Queue* q, Task task) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = task;
+    newNode->next = NULL;
+    
+    if (isEmpty(q)) {
+        q->front = newNode;
+        q->rear = newNode;
+    } else {
+        q->rear->next = newNode;
+        q->rear = newNode;
+    }
+}
+
+// Function to dequeue a task from the queue
+Task dequeue(Queue* q) {
+    if (isEmpty(q)) {
+        printf("Queue is empty!\n");
+        exit(1);
+    }
+
+    Node* temp = q->front;
+    Task task = temp->data;
+    q->front = q->front->next;
+    free(temp);
+    
+    if (q->front == NULL) {
+        q->rear = NULL;
+    }
+    
+    return task;
+}
+
+// Function to display the contents of the queue
+void displayQueue(Queue* q) {
+    if (isEmpty(q)) {
+        printf("Queue is empty!\n");
+        return;
+    }
+    
+    Node* current = q->front;
+    printf("Tasks in the Queue:\n");
+    while (current != NULL) {
+        printf("Task ID: %d, Task Name: %s, Priority: %d\n", current->data.taskID, current->data.taskName, current->data.priority);
+        current = current->next;
+    }
+}
+
+int main() {
+    Queue taskQueue;
+    initializeQueue(&taskQueue);
+    int choice;
+    
+    do {
+        printf("\nTask Scheduler Menu:\n");
+        printf("1. Add Task\n");
+        printf("2. Execute Task\n");
+        printf("3. Display Tasks\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        
+        switch(choice) {
+            case 1: {
+                Task newTask;
+                printf("Enter Task ID: ");
+                scanf("%d", &newTask.taskID);
+                printf("Enter Task Name: ");
+                scanf("%s", newTask.taskName);
+                printf("Enter Priority (1-High, 2-Medium, 3-Low): ");
+                scanf("%d", &newTask.priority);
+                enqueue(&taskQueue, newTask);
+                printf("Task added successfully!\n");
+                break;
+            }
+            case 2: {
+                if (!isEmpty(&taskQueue)) {
+                    Task executedTask = dequeue(&taskQueue);
+                    printf("Task ID: %d, Task Name: %s, Priority: %d executed.\n", executedTask.taskID, executedTask.taskName, executedTask.priority);
+                } else {
+                    printf("No tasks to execute!\n");
+                }
+                break;
+            }
+            case 3: {
+                displayQueue(&taskQueue);
+                break;
+            }
+            case 4: {
+                printf("Exiting...\n");
+                break;
+            }
+            default: {
+                printf("Invalid choice! Please enter a number between 1 and 4.\n");
+                break;
+            }
+        }
+    } while (choice != 4);
+    
+    return 0;
+}
